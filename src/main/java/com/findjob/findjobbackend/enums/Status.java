@@ -1,4 +1,4 @@
-package com.findjob.findjobbackend.model;
+package com.findjob.findjobbackend.enums;
 
 public enum Status {
     ACTIVE,
@@ -8,5 +8,6 @@ public enum Status {
     HOT,
     WAIT,
     REJECT,
-    APCEPT
+    ACCEPT,
+    DELETE,
 }

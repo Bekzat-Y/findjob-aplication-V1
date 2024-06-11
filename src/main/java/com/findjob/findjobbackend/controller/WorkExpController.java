@@ -1,11 +1,10 @@
 package com.findjob.findjobbackend.controller;
 
 
-
 import com.findjob.findjobbackend.dto.response.ResponseMessage;
 import com.findjob.findjobbackend.model.WorkExp;
 import com.findjob.findjobbackend.service.workExp.WorkExpService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +15,9 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 @RequestMapping("WorkExp")
 @RestController
+@RequiredArgsConstructor
 public class WorkExpController {
-    @Autowired
-    WorkExpService workExpService;
+    private final   WorkExpService workExpService;
 
     @GetMapping("/list")
     public ResponseEntity<?> showListWorkExp() {
@@ -28,47 +27,50 @@ public class WorkExpController {
         }
         return new ResponseEntity<>(workExps, HttpStatus.OK);
     }
-
-
     @PostMapping("")
     public ResponseEntity<?> createWorkExp(@RequestBody WorkExp workExp) {
         if (workExp.getTitle() == null) {
-            return new ResponseEntity<>(new ResponseMessage("no_title"), HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseMessage("no_title"), HttpStatus.BAD_REQUEST);
         }
-        if(workExp.getStartDate()==null){
-            return new ResponseEntity<>(new ResponseMessage("no_start_date"), HttpStatus.OK);
+        if (workExp.getStartDate() == null) {
+            return new ResponseEntity<>(new ResponseMessage("no_start_date"), HttpStatus.BAD_REQUEST);
         }
-        if(workExp.getEndDate()==null){
-            return new ResponseEntity<>(new ResponseMessage("no_end_date"), HttpStatus.OK);
+        if (workExp.getEndDate() == null) {
+            return new ResponseEntity<>(new ResponseMessage("no_end_date"), HttpStatus.BAD_REQUEST);
         }
         workExpService.save(workExp);
         return new ResponseEntity<>(new ResponseMessage("yes"), HttpStatus.OK);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<?> updateWorkExp(@PathVariable Long id,@RequestBody WorkExp workExp){
-        Optional<WorkExp> workExp1 = workExpService.findById(id);
-        if(workExp1.isEmpty()){
+    public ResponseEntity<?> updateWorkExp(@PathVariable Long id, @RequestBody WorkExp workExp) {
+        Optional<WorkExp> workExpOptional = workExpService.findById(id);
+        if (workExpOptional.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        if (workExp.getTitle() == null) {
-            return new ResponseEntity<>(new ResponseMessage("no_title"), HttpStatus.OK);
+
+        if (workExp.getTitle().isEmpty()) {
+            return new ResponseEntity<>(new ResponseMessage("no_title"), HttpStatus.BAD_REQUEST);
         }
-        if(workExp.getStartDate()==null){
-            return new ResponseEntity<>(new ResponseMessage("no_start_date"), HttpStatus.OK);
+        if (workExp.getStartDate() == null) {
+            return new ResponseEntity<>(new ResponseMessage("no_start_date"), HttpStatus.BAD_REQUEST);
         }
-        if(workExp.getEndDate()==null){
-            return new ResponseEntity<>(new ResponseMessage("no_end_date"), HttpStatus.OK);
+        if (workExp.getEndDate() == null) {
+            return new ResponseEntity<>(new ResponseMessage("no_end_date"), HttpStatus.BAD_REQUEST);
         }
 
-        workExp1.get().setTitle(workExp.getTitle());
-        workExp1.get().setContent(workExp.getContent());
-        workExp1.get().setCv(workExp.getCv());
-        workExp1.get().setStartDate(workExp.getStartDate());
-        workExp1.get().setEndDate(workExp.getEndDate());
-        workExpService.save(workExp1.get());
-        return new ResponseEntity<>(workExp1.get(), HttpStatus.OK);
+        WorkExp existingWorkExp = workExpOptional.get();
+        existingWorkExp.setTitle(workExp.getTitle());
+        existingWorkExp.setContent(workExp.getContent());
+        existingWorkExp.setCv(workExp.getCv());
+        existingWorkExp.setStartDate(workExp.getStartDate());
+        existingWorkExp.setEndDate(workExp.getEndDate());
+
+        workExpService.save(existingWorkExp);
+        return new ResponseEntity<>(existingWorkExp, HttpStatus.OK);
     }
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteWorkExp(@PathVariable Long id) {

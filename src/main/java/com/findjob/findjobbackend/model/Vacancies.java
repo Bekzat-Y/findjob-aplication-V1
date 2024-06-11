@@ -15,7 +15,7 @@ public class Vacancies {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @OneToMany(targetEntity = RecuitmentNew.class, mappedBy = "vacancies")
+    @OneToMany(targetEntity = RecruitmentNew.class, mappedBy = "vacancies")
     @JsonIgnore
-    private List<RecuitmentNew> recuitmentNews;
+    private List<RecruitmentNew> recruitmentNews;
 }
