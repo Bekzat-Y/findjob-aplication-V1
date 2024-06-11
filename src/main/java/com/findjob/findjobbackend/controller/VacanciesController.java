@@ -3,7 +3,7 @@ package com.findjob.findjobbackend.controller;
 import com.findjob.findjobbackend.model.Vacancies;
 import com.findjob.findjobbackend.service.vacancies.IVacanciesService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +13,10 @@ import java.util.Optional;
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/vacancies")
-
+@RequiredArgsConstructor
 public class VacanciesController {
-    @Autowired
-    private IVacanciesService vacanciesService;
+
+    private final IVacanciesService vacanciesService;
 
     @GetMapping("/showAll")
     public ResponseEntity<Iterable<Vacancies>> showAll(){

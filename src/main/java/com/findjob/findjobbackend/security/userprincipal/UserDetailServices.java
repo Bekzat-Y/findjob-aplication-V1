@@ -2,6 +2,7 @@ package com.findjob.findjobbackend.security.userprincipal;
 
 import com.findjob.findjobbackend.model.Account;
 import com.findjob.findjobbackend.repository.IAccountRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -40,8 +41,10 @@ public class UserDetailServices implements UserDetailsService {
     }
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Implement this method if needed
-        throw new UsernameNotFoundException("User not found with username: " + username);
+        Account user = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+        return UserPrinciple.build(user);
     }
 }

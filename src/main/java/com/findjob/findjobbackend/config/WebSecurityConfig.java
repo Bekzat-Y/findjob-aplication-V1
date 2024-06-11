@@ -2,7 +2,7 @@ package com.findjob.findjobbackend.config;
 
 import com.findjob.findjobbackend.security.jwt.JwtEntryPoint;
 import com.findjob.findjobbackend.security.jwt.JwtTokenFilter;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,10 +15,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
+@EnableWebMvc
+@AllArgsConstructor
 public class WebSecurityConfig{
     private final JwtEntryPoint jwtEntryPoint;
 
@@ -32,7 +34,7 @@ public class WebSecurityConfig{
     }
 
     @Bean
-    PasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -42,8 +44,11 @@ public class WebSecurityConfig{
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/public/**").permitAll()
-                        .requestMatchers("/api/**").authenticated()
-                        .anyRequest().denyAll()
+                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/sign/signup").permitAll()
+                        .requestMatchers("/sign/signin").permitAll()
+                        .requestMatchers("/user/add").permitAll()
+                        .anyRequest().permitAll()
                 )
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling.authenticationEntryPoint(jwtEntryPoint)
