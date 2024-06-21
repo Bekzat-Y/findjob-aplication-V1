@@ -8,6 +8,9 @@ import lombok.Getter;
 public enum UserStatus {
     DELETE,
     BLOCK,
-    ACTIVE
+    ACTIVE,
+
+
+
 
 }

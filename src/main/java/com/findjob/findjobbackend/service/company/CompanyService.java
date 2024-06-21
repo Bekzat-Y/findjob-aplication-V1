@@ -1,6 +1,7 @@
 package com.findjob.findjobbackend.service.company;
 
 import com.findjob.findjobbackend.dto.response.CompanyRecruitmentNeed;
+import com.findjob.findjobbackend.enums.Status;
 import com.findjob.findjobbackend.model.Company;
 import com.findjob.findjobbackend.repository.ICompanyRepository;
 import lombok.AllArgsConstructor;
@@ -36,14 +37,23 @@ public class CompanyService implements ICompanyService {
     @Override
     public void deleteById(Long id) {
         if (id == null) {
-            logger.error("ID parameter is null");
+            logger.error("ID parameter is null or empty");
             throw new IllegalArgumentException("ID parameter cannot be null");
         }
         if (!iCompanyRepository.existsById(id)) {
             logger.error("Company with ID {} does not exist", id);
             throw new IllegalArgumentException("Company with ID " + id + " does not exist");
         }
-        iCompanyRepository.deleteById(id);
+        try {
+            Company company = iCompanyRepository.findById(id).orElse(null);
+            if (company != null ) {
+                company.setStatusCompany(Status.DELETE);
+                iCompanyRepository.save(company);
+            }
+        }catch (NullPointerException e){
+            logger.error("{}Company with ID {} does not exist", e, id);
+        }
+
     }
 
     @Override

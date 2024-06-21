@@ -4,6 +4,7 @@ package com.findjob.findjobbackend.controller;
 import com.findjob.findjobbackend.model.Field;
 import com.findjob.findjobbackend.service.field.IFieldService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,20 +33,10 @@ public class FieldController {
     public ResponseEntity<Field> createField(@RequestBody Field field){
         return new ResponseEntity<>(fieldService.save(field), HttpStatus.CREATED);
     }
-    @PutMapping("/edit/{id}")
-    public ResponseEntity<Field> editField(@PathVariable Long id, @RequestBody Field field){
-        Optional<Field> fieldOptional = fieldService.findById(id);
-        if (fieldOptional.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } else {
-            if (field.getId() != null){
-                field.setId(id);
-            }
-            return new ResponseEntity<>(fieldService.save(field),HttpStatus.OK);
-        }
-    }
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Field> deleteField(@PathVariable Long id){
+
+
+    @GetMapping("/delete/{id}")
+    public ResponseEntity<Field> deleteField(@PathVariable Long id) throws ChangeSetPersister.NotFoundException {
         Optional<Field> fieldOptional = fieldService.findById(id);
         if (fieldOptional.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

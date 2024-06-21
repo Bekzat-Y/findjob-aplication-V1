@@ -44,23 +44,20 @@ public class SkillController {
         if(skill.getName()==null){
             return new ResponseEntity<>(new ResponseMessage("no_name_skill"), HttpStatus.OK);
         }
-        skill1.get().setName(skill.getName());
-        skill1.get().setCv(skill.getCv());
-        skillService.save(skill1.get());
+        skillService.save(skill);
         return new ResponseEntity<>(skill1.get(), HttpStatus.OK);
     }
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> detailSkill(@PathVariable Long id) {
+    public ResponseEntity<?> getSkillsById(@PathVariable Long id) {
         Optional<Skill> skill = skillService.findById(id);
         if (skill.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(skill.get(), HttpStatus.OK);
         }
-        return new ResponseEntity<>(skill, HttpStatus.OK);
+        else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-
-    @DeleteMapping("/{id}")
+    @GetMapping("/delete/{id}")
     public ResponseEntity<?> deleteCV(@PathVariable Long id) {
         Optional<Skill> skill = skillService.findById(id);
         if (skill.isEmpty()) {
@@ -70,9 +67,4 @@ public class SkillController {
         return new ResponseEntity<>(new ResponseMessage("yes"), HttpStatus.OK);
     }
 
-    @GetMapping("/cv/{id}")
-    public ResponseEntity<?> findSkillByCvId(@PathVariable Long id) {
-        List<Skill> skill = (List<Skill>) skillService.findAllSkillsByCvId(id);
-        return new ResponseEntity<>(skill, HttpStatus.OK);
-    }
 }

@@ -1,5 +1,6 @@
 package com.findjob.findjobbackend.service.vacancies;
 
+import com.findjob.findjobbackend.enums.Status;
 import com.findjob.findjobbackend.model.Vacancies;
 import com.findjob.findjobbackend.repository.IVacanciesRepository;
 import lombok.AllArgsConstructor;
@@ -39,7 +40,13 @@ public class VacanciesService implements IVacanciesService {
             logger.error("ID parameter is null");
             throw new IllegalArgumentException("ID parameter cannot be null");
         }
-        vacanciesRepository.deleteById(id);
+       Vacancies vacancies = vacanciesRepository.findById(id).orElse(null);
+        if (vacancies != null) {
+            vacancies.setStatus(Status.DELETE);
+            vacanciesRepository.save(vacancies);
+        }
+        else
+            logger.error("Vacancies not found");
     }
 
     @Override

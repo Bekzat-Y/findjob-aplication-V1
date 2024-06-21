@@ -18,7 +18,6 @@ public class WorkExpService implements IWorkExpService {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkExpService.class);
 
-    @Autowired
     private final IWorkExpRepository workExpRepository;
 
     @Override
@@ -33,6 +32,10 @@ public class WorkExpService implements IWorkExpService {
             throw new IllegalArgumentException("Pageable parameter cannot be null");
         }
         return workExpRepository.findAll(pageable);
+    }
+
+    public void delete(WorkExp workExp) {
+        workExpRepository.delete(workExp);
     }
 
     @Override

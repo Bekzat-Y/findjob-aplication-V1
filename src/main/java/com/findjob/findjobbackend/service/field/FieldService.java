@@ -1,14 +1,16 @@
 package com.findjob.findjobbackend.service.field;
 
+import com.findjob.findjobbackend.enums.Status;
 import com.findjob.findjobbackend.model.Field;
 import com.findjob.findjobbackend.repository.IFieldRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -40,7 +42,9 @@ public class FieldService implements IFieldService {
             logger.error("ID parameter is null or empty");
             throw new IllegalArgumentException("ID parameter cannot be null");
         }
-        fieldRepository.deleteById(id);
+        Field field = fieldRepository.findById(id).orElseThrow(EntityNotFoundException::new);
+        field.setStatus(Status.DELETE);
+        fieldRepository.save(field);
     }
 
     @Override
@@ -60,4 +64,6 @@ public class FieldService implements IFieldService {
         }
         return fieldRepository.findById(id);
     }
+
+
 }

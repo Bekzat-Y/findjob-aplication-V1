@@ -4,6 +4,7 @@ import com.findjob.findjobbackend.model.Vacancies;
 import com.findjob.findjobbackend.service.vacancies.IVacanciesService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,8 +47,8 @@ public class VacanciesController {
         }
 
     }
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Vacancies> deleteVacancies(@PathVariable Long id){
+    @GetMapping("/delete/{id}")
+    public ResponseEntity<Vacancies> deleteVacancies(@PathVariable Long id) throws ChangeSetPersister.NotFoundException {
         Optional<Vacancies> vacanciesOptional = vacanciesService.findById(id);
         if (vacanciesOptional.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

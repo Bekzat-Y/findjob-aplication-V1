@@ -1,9 +1,11 @@
 package com.findjob.findjobbackend.controller;
 
 
+import com.findjob.findjobbackend.dto.request.WorkExpDTO;
 import com.findjob.findjobbackend.dto.response.ResponseMessage;
 import com.findjob.findjobbackend.model.WorkExp;
 import com.findjob.findjobbackend.service.workExp.WorkExpService;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,11 +13,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
 @RequestMapping("WorkExp")
 @RestController
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class WorkExpController {
     private final   WorkExpService workExpService;
 
@@ -25,7 +28,10 @@ public class WorkExpController {
         if (workExps.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(workExps, HttpStatus.OK);
+        List<WorkExpDTO> workExpDTOs = workExps.stream()
+                .map(WorkExpDTO::new)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(workExpDTOs, HttpStatus.OK);
     }
     @PostMapping("")
     public ResponseEntity<?> createWorkExp(@RequestBody WorkExp workExp) {
@@ -37,6 +43,9 @@ public class WorkExpController {
         }
         if (workExp.getEndDate() == null) {
             return new ResponseEntity<>(new ResponseMessage("no_end_date"), HttpStatus.BAD_REQUEST);
+        }
+        if (workExp.getCv()==null){
+            return new ResponseEntity<>(new ResponseMessage("no_cv"), HttpStatus.BAD_REQUEST);
         }
         workExpService.save(workExp);
         return new ResponseEntity<>(new ResponseMessage("yes"), HttpStatus.OK);
@@ -72,7 +81,7 @@ public class WorkExpController {
 
 
 
-    @DeleteMapping("/{id}")
+    @GetMapping("/delete/{id}")
     public ResponseEntity<?> deleteWorkExp(@PathVariable Long id) {
         Optional<WorkExp> workExp = workExpService.findById(id);
         if (workExp.isEmpty()) {

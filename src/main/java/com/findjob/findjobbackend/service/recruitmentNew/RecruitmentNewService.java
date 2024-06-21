@@ -3,15 +3,18 @@ package com.findjob.findjobbackend.service.recruitmentNew;
 import com.findjob.findjobbackend.dto.request.SearchJob;
 import com.findjob.findjobbackend.dto.response.PageResponse;
 import com.findjob.findjobbackend.dto.response.RecruitmentNewDTO;
+import com.findjob.findjobbackend.dto.response.ResponseMessage;
+import com.findjob.findjobbackend.enums.Status;
 import com.findjob.findjobbackend.model.RecruitmentNew;
 import com.findjob.findjobbackend.repository.IRecruitmentNewDAO;
 import com.findjob.findjobbackend.repository.IRecruitmentNewRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +26,7 @@ public class RecruitmentNewService implements IRecruitmentNewService {
     private static final Logger logger = LoggerFactory.getLogger(RecruitmentNewService.class);
 
     private final IRecruitmentNewRepository recruitmentNewRepository;
+    @Qualifier("IRecruitmentNewDAO")
     private final IRecruitmentNewDAO recruitmentNewDAO;
 
     @Override
@@ -45,8 +49,12 @@ public class RecruitmentNewService implements IRecruitmentNewService {
             logger.error("ID parameter is null or empty");
             throw new IllegalArgumentException("ID parameter cannot be null");
         }
-        recruitmentNewRepository.deleteById(id);
-    }
+        RecruitmentNew recruitmentNew = recruitmentNewRepository.findById(id).orElse(null);
+        if (recruitmentNew != null) {
+            recruitmentNew.setRecruitStatus(Status.DELETE);
+            recruitmentNewRepository.save(recruitmentNew);
+        }
+        }
 
     @Override
     public RecruitmentNew save(RecruitmentNew recruitmentNew) {
@@ -54,7 +62,9 @@ public class RecruitmentNewService implements IRecruitmentNewService {
             logger.error("RecruitmentNew parameter is null");
             throw new IllegalArgumentException("RecruitmentNew parameter cannot be null");
         }
-        return recruitmentNewRepository.save(recruitmentNew);
+        else
+           return recruitmentNewRepository.save(recruitmentNew);
+
     }
 
     @Override
@@ -65,7 +75,38 @@ public class RecruitmentNewService implements IRecruitmentNewService {
         }
         return recruitmentNewRepository.findById(id);
     }
+    @Override
+    public ResponseMessage updateRecruitmentNew(Long id, RecruitmentNew recruitmentNew) {
+        Optional<RecruitmentNew> recruitmentNewOptional = findById(id);
+        if (recruitmentNewOptional.isEmpty()) {
+            return new ResponseMessage("not_found");
+        }
 
+        RecruitmentNew existingRecruitmentNew = recruitmentNewOptional.get();
+
+        if (recruitmentNew.getQuantity() == null) {
+            return new ResponseMessage("no_quantity");
+        }
+
+        if (recruitmentNew.getSalary() == null) {
+            return new ResponseMessage("no_salary");
+        }
+
+        existingRecruitmentNew.setTitle(recruitmentNew.getTitle());
+        existingRecruitmentNew.setWorkingTime(recruitmentNew.getWorkingTime());
+        existingRecruitmentNew.setField(recruitmentNew.getField());
+        existingRecruitmentNew.setVacancies(recruitmentNew.getVacancies());
+        existingRecruitmentNew.setExpDate(recruitmentNew.getExpDate());
+        existingRecruitmentNew.setDescription(recruitmentNew.getDescription());
+        existingRecruitmentNew.setQuantity(recruitmentNew.getQuantity());
+        existingRecruitmentNew.setSalary(recruitmentNew.getSalary());
+        existingRecruitmentNew.setGender(recruitmentNew.getGender());
+        existingRecruitmentNew.setCity(recruitmentNew.getCity());
+
+        save(existingRecruitmentNew);
+
+        return new ResponseMessage("yes");
+    }
     @Override
     public List<RecruitmentNew> findAllByCompany_Id(Long id) {
         if (id == null) {

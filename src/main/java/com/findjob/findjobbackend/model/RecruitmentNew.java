@@ -1,6 +1,7 @@
 package com.findjob.findjobbackend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.findjob.findjobbackend.enums.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,7 +15,6 @@ public class RecruitmentNew {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String codeNews;
     private String title;
     @ManyToOne(targetEntity = WorkingTime.class)
     private WorkingTime workingTime;
@@ -35,4 +35,6 @@ public class RecruitmentNew {
     @OneToMany(targetEntity = Apply.class, mappedBy = "recruitmentNew")
     @JsonIgnore
     private List<Apply> applies;
+    @Enumerated(EnumType.STRING)
+    private Status recruitStatus;
 }

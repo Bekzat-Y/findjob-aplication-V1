@@ -20,7 +20,6 @@ public class ApplyService implements IApplyService {
     private final IApplyRepository applyRepository;
 
 
-
     @Override
     public Iterable<Apply> findAll() {
         return applyRepository.findAll();
@@ -66,14 +65,14 @@ public class ApplyService implements IApplyService {
         return applyRepository.findById(id);
     }
 
-    @Override
-    public Page<ApplyShowAll> findAllByCompanyId(Pageable page, Long id) {
-        if (page == null || id == null) {
-            logger.error("Page or ID parameter is null");
-            throw new IllegalArgumentException("Page and ID parameters cannot be null");
-        }
-        return applyRepository.findAllByCompanyId(page, id);
-    }
+//    @Override
+//    public Page<ApplyShowAll> findAllByCompanyId(Pageable page, Long id) {
+//        if (page == null || id == null) {
+//            logger.error("Page or ID parameter is null");
+//            throw new IllegalArgumentException("Page and ID parameters cannot be null");
+//        }
+//        return applyRepository.findAllByCompanyId(page, id);
+//    }
 
     @Override
     public Page<Apply> findAllByUserId(Pageable pageable, Long id) {

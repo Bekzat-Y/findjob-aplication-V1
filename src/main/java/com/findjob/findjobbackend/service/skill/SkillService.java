@@ -1,14 +1,15 @@
 package com.findjob.findjobbackend.service.skill;
 
+import com.findjob.findjobbackend.enums.Status;
 import com.findjob.findjobbackend.model.Skill;
 import com.findjob.findjobbackend.repository.ISkillRepository;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -41,7 +42,15 @@ public class SkillService implements ISkillService {
             logger.error("ID parameter is null or empty");
             throw new IllegalArgumentException("ID parameter cannot be null");
         }
-        skillRepository.deleteById(id);
+        skillRepository.findById(id).ifPresent(skill -> {
+            skill.setStatus(Status.DELETE);
+            skillRepository.save(skill);
+            logger.info("Skill with id {} was deleted", id);
+        });
+    }
+
+    public void delete(Skill skill) {
+        skillRepository.delete(skill);
     }
 
     @Override
@@ -58,17 +67,10 @@ public class SkillService implements ISkillService {
         if (id == null) {
             logger.error("ID parameter is null");
             throw new IllegalArgumentException("ID parameter cannot be null");
-        }
-        return skillRepository.findById(id);
-    }
+        }else {
+            return skillRepository.findById(id);
 
-    @Override
-    public Iterable<Skill> findAllSkillsByCvId(Long id) {
-        if (id == null) {
-            logger.error("CV ID parameter is null");
-            throw new IllegalArgumentException("CV ID parameter cannot be null");
         }
-        return skillRepository.findAllByCv_Id(id);
     }
 
     @Override
@@ -80,6 +82,8 @@ public class SkillService implements ISkillService {
         return skillRepository.existsByCv_Id(id);
     }
 
+
+
     @Override
     public boolean existsById(Long id) {
         if (id == null) {
@@ -88,4 +92,21 @@ public class SkillService implements ISkillService {
         }
         return skillRepository.existsById(id);
     }
+
+    @Override
+    public Optional<Skill> updateSkill(Skill skill) {
+        if (skill != null) {
+            Optional<Skill> optionalSkill = skillRepository.findById(skill.getId());
+            if (optionalSkill.isPresent()) {
+                skill.setName(skill.getName());
+                skill.setProficiency(skill.getProficiency());
+                skill.setCv(skill.getCv());
+                logger.info("Updating skill");
+            } else {
+                logger.error("Skill not found");
+                throw new IllegalArgumentException("Skill not found");
+
+            }
+        }
+    return Optional.ofNullable(skill);}
 }

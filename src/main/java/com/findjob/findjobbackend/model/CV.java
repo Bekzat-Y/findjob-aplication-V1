@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.findjob.findjobbackend.dto.request.CvDTO;
 import com.findjob.findjobbackend.dto.request.SkillDTO;
 import com.findjob.findjobbackend.dto.request.WorkExpDTO;
+import com.findjob.findjobbackend.enums.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.Fetch;
@@ -19,7 +20,8 @@ public class CV {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
     private int expYear;
     private Double salaryExpectation;
@@ -28,10 +30,11 @@ public class CV {
     @Fetch(value = FetchMode.SUBSELECT)
     @JsonIgnore
     private List<Skill> skills;
-    @OneToMany(targetEntity = WorkExp.class, fetch = FetchType.EAGER, mappedBy = "cv")
-    @Fetch(value = FetchMode.SUBSELECT)
+    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<WorkExp> workExps;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     public CvDTO toDto(CV cv) {
         CvDTO cvDTO = new CvDTO();
