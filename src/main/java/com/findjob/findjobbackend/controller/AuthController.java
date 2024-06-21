@@ -54,7 +54,6 @@ public class AuthController {
 
     private final CompanyService companyService;
 
-
     private final UserService userService;
 
     @PostMapping("/signup")
@@ -113,7 +112,7 @@ public class AuthController {
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
 
         if (userPrinciple.getStatus().equalsIgnoreCase(String.valueOf(Status.NON_ACTIVE))) {
-            return new ResponseEntity<>(new ResponseMessage("LOCK"), HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseMessage("LOCK"), HttpStatus.LOCKED);
         }
 
         String token = jwtProvider.createToken(authentication);
@@ -156,7 +155,7 @@ public class AuthController {
     public ResponseEntity<?> findById(@PathVariable Long id) {
         Optional<Account> accountOptional = accountService.findById(id);
         if (accountOptional.isPresent()) {
-            return new ResponseEntity<>(accountOptional.get().getStatus(), HttpStatus.OK);
+            return new ResponseEntity<>(accountOptional,HttpStatus.OK);
         } else {
             return new ResponseEntity<>(new ResponseMessage("Account not found"), HttpStatus.NOT_FOUND);
         }

@@ -15,6 +15,7 @@ import com.findjob.findjobbackend.service.workExp.WorkExpService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class CVController {
         return new ResponseEntity<>(cv, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
+    @GetMapping("delete/{id}")
     public ResponseEntity<?> deleteCV(@PathVariable Long id) {
         Optional<CV> cv = cvService.findById(id);
         if (cv.isEmpty()) {
@@ -61,8 +62,8 @@ public class CVController {
         cvService.deleteById(id);
         return new ResponseEntity<>(new ResponseMessage("yes"), HttpStatus.OK);
     }
-
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<?> updateCvByUserId(@PathVariable Long id, @RequestBody CvDTO cvDTO) {
         Optional<CV> cvOptional = cvService.findByUserId(id);
         if (cvOptional.isEmpty()) {
@@ -75,18 +76,46 @@ public class CVController {
         cv.setFileCV(cvDTO.getFileCV());
         cv.setSalaryExpectation(cvDTO.getSalaryExpectation());
 
-        List<Skill> skills = new ArrayList<>();
-        for (SkillDTO skillDTO : cvDTO.getSkills()) {
+        // Управление навыками
+        List<Skill> existingSkills = cv.getSkills();
+        List<SkillDTO> updatedSkillsDTO = cvDTO.getSkills();
+
+        // Удаляем навыки, которые больше не существуют
+        existingSkills.removeIf(existingSkill -> {
+            boolean exists = updatedSkillsDTO.stream().anyMatch(updatedSkillDTO -> updatedSkillDTO.getId().equals(existingSkill.getId()));
+            if (!exists) {
+                skillService.delete(existingSkill);
+            }
+            return !exists;
+        });
+
+        // Обновляем или добавляем навыки
+        for (SkillDTO skillDTO : updatedSkillsDTO) {
             Skill skill = skillService.findById(skillDTO.getId()).orElse(new Skill());
             skill.setCv(cv);
             skill.setName(skillDTO.getName());
             skill.setProficiency(skillDTO.getProficiency());
             skillService.save(skill);
-            skills.add(skill);
+            if (!existingSkills.contains(skill)) {
+                existingSkills.add(skill);
+            }
         }
 
-        List<WorkExp> workExps = new ArrayList<>();
-        for (WorkExpDTO workExpDTO : cvDTO.getWorkExps()) {
+        // Управление опытом работы
+        List<WorkExp> existingWorkExps = cv.getWorkExps();
+        List<WorkExpDTO> updatedWorkExpsDTO = cvDTO.getWorkExps();
+
+        // Удаляем опыт работы, который больше не существует
+        existingWorkExps.removeIf(existingWorkExp -> {
+            boolean exists = updatedWorkExpsDTO.stream().anyMatch(updatedWorkExpDTO -> updatedWorkExpDTO.getId().equals(existingWorkExp.getId()));
+            if (!exists) {
+                workExpService.delete(existingWorkExp);
+            }
+            return !exists;
+        });
+
+        // Обновляем или добавляем опыт работы
+        for (WorkExpDTO workExpDTO : updatedWorkExpsDTO) {
             WorkExp workExp = workExpService.findById(workExpDTO.getId()).orElse(new WorkExp());
             workExp.setCv(cv);
             workExp.setTitle(workExpDTO.getTitle());
@@ -94,24 +123,24 @@ public class CVController {
             workExp.setStartDate(workExpDTO.getStartDate());
             workExp.setEndDate(workExpDTO.getEndDate());
             workExpService.save(workExp);
-            workExps.add(workExp);
+            if (!existingWorkExps.contains(workExp)) {
+                existingWorkExps.add(workExp);
+            }
         }
 
-        cv.setSkills(skills);
-        cv.setWorkExps(workExps);
+        cv.setSkills(existingSkills);
+        cv.setWorkExps(existingWorkExps);
         cvService.save(cv);
 
         CvDTO cvDTO1 = cv.toDto(cv);
         return new ResponseEntity<>(cvDTO1, HttpStatus.OK);
     }
 
-
     @PostMapping("/createCV")
     public ResponseEntity<?> create(@RequestBody CvDTO cvDTO) {
-        if (cvService.existsByUserId(cvDTO.getUserId())) {
-            return new ResponseEntity<>(new ResponseMessage("user_da_ton_tai"), HttpStatus.OK);
+        if (cvDTO.getUserId()==null){
+            return new ResponseEntity<>(new ResponseMessage("User not found"), HttpStatus.NOT_FOUND);
         }
-
         CV cv = new CV();
         cv = cv.toEntity(cvDTO);
 
@@ -161,4 +190,6 @@ public class CVController {
         Optional<CV> cv = cvService.findByUserId(id);
         return new ResponseEntity<>(cv, HttpStatus.OK);
     }
+
 }
+

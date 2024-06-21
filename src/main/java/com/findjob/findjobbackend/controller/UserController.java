@@ -2,12 +2,10 @@ package com.findjob.findjobbackend.controller;
 
 
 import com.findjob.findjobbackend.dto.response.ResponseMessage;
-import com.findjob.findjobbackend.model.Account;
 import com.findjob.findjobbackend.model.User;
-import com.findjob.findjobbackend.security.userprincipal.UserDetailServices;
-import com.findjob.findjobbackend.service.account.AccountService;
 import com.findjob.findjobbackend.service.user.IUserService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,12 +21,6 @@ public class UserController {
 
 
     private final IUserService userService;
-
-    private final UserDetailServices userDetailServices;
-
-
-
-   private final AccountService accountService;
 
     @GetMapping
     public ResponseEntity<Iterable<User>> findAll() {
@@ -49,33 +41,39 @@ public class UserController {
         if (user.getName() == null) {
             return new ResponseEntity<>(new ResponseMessage("name_null"), HttpStatus.OK);
         }
-        userService.save(user);
-        accountService.findById(user.getAccount().getId());
+        else {
+            userService.save(user);
         return new ResponseEntity<>(new ResponseMessage("Успешно"), HttpStatus.OK);
+
+        }
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User user) {
-        Account account = userDetailServices.getCurrentUser();
-        if (account.getUsername().equals("Anonymous")) {
-            return new ResponseEntity<>(new ResponseMessage("Пожалуйста войдите !"), HttpStatus.OK);
-        }
         Optional<User> userOptional = userService.findById(id);
         if (userOptional.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        userOptional.get().setName(user.getName());
-        userOptional.get().setPhone(user.getPhone());
-        userService.save(userOptional.get());
+        user.setId(id);
+        userService.updateUser(user);
         return new ResponseEntity<>(new ResponseMessage("yes"), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCompany(@PathVariable Long id) {
-        Optional<User> user = userService.findByAccount_Id(id);
+    @GetMapping("/delete/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) throws ChangeSetPersister.NotFoundException {
+        if (id == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        Optional<User> user = userService.findById(id);
         if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(new ResponseMessage("да"), HttpStatus.OK);
+
+        userService.deleteById(id);
+        return new ResponseEntity<>(new ResponseMessage("User successfully deleted"), HttpStatus.OK);
     }
+
+
 }

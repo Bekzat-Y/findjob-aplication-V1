@@ -21,10 +21,7 @@ public class UserPrinciple implements UserDetails {
     private String status;
     private Collection<? extends GrantedAuthority> roles;
 
-    public UserPrinciple() {
-    }
-
-    public UserPrinciple(Long id, String username, String password, String status, Collection<? extends GrantedAuthority> roles) {
+       public UserPrinciple(Long id, String username, String password, String status, Collection<? extends GrantedAuthority> roles) {
         this.id = id;
         this.username = username;
         this.password = password;

@@ -1,11 +1,13 @@
 package com.findjob.findjobbackend.controller;
 
 
+import com.findjob.findjobbackend.dto.request.SignUpForm;
 import com.findjob.findjobbackend.model.City;
 import com.findjob.findjobbackend.service.city.CityService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -41,21 +43,20 @@ public class CityController {
         if (cityOptional.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            if (city.getId() != null) {
+            if (id != null) {
                 city.setId(id);
             }
-            return new ResponseEntity<>(cityService.save(city), HttpStatus.OK);
+            return new ResponseEntity<>(cityService.updateCity(city),HttpStatus.OK);
         }
     }
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<City> deleteCity(@PathVariable Long id){
-        Optional<City> cityOptional = cityService.findById(id);
-        if (cityOptional.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    @Transactional
+    @GetMapping("/delete/{id}")
+    public ResponseEntity<City> deleteCityById(@PathVariable Long id) {
+        if (id != null) {
+            cityService.getCityById(id);
         }
-        cityService.deleteById(id);
-
-        return new ResponseEntity<>(cityOptional.get(),HttpStatus.OK);
+        else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>( HttpStatus.OK);
     }
 
 

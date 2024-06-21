@@ -8,8 +8,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 
 public interface IApplyService  extends IGeneralService<Apply> {
-    Page<ApplyShowAll> findAllByCompanyId(Pageable page, @Param("idCompany") Long id);
+//    Page<ApplyShowAll> findAllByCompanyId(Pageable page, @Param("idCompany") Long id);
+
     Page<Apply> findAllByUserId(Pageable pageable, Long id);
+
     boolean existsByUserIdAndRecruitmentNewId(Long userID, Long recruitmentID);
 
 }

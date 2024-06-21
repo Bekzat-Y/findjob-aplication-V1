@@ -1,17 +1,15 @@
 package com.findjob.findjobbackend.service.user;
 
-import com.findjob.findjobbackend.dto.request.UsernameAndPasswordUser;
-import com.findjob.findjobbackend.enums.UserStatus;
+import com.findjob.findjobbackend.enums.Status;
 import com.findjob.findjobbackend.model.User;
 import com.findjob.findjobbackend.repository.IUserRepository;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -39,31 +37,25 @@ public class UserService implements IUserService {
     @Override
     public void deleteById(Long id) {
         if (id == null) {
-            logger.error("ID parameter is null");
-            throw new IllegalArgumentException("ID parameter cannot be null");
+            logger.error("User id cannot be null");
+            throw new IllegalArgumentException("User id cannot be null");
         }
 
-        Optional<User> userOptional = userRepository.findByAccount_Id(id);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            user.setStatus(UserStatus.DELETE);
+        userRepository.findById(id).ifPresent(user -> {
+            user.setStatus(Status.DELETE);
             userRepository.save(user);
-        } else {
-            logger.error("User not found with ID: {}", id);
-            throw new RuntimeException("User not found with ID: " + id);
-        }
+            logger.info("User with id {} was deleted", id);
+        });
     }
+
 
     @Override
     public User save(User user) {
         if (user == null) {
             logger.error("User parameter is null");
             throw new IllegalArgumentException("User parameter cannot be null");
-        }
-         if (!Objects.equals(user.getId(), user.getAccount().getId())) {
-            throw new IllegalArgumentException("Такой пользователь не найден");
-         }
-        return userRepository.save(user);
+
+        }else return  userRepository.save(user);
     }
 
     @Override
@@ -94,11 +86,32 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UsernameAndPasswordUser findUsernameAndPassword(Long id) {
-        if (id == null) {
-            logger.error("ID parameter is null ");
-            throw new IllegalArgumentException("ID parameter cannot be null");
-        }
-        return null;
+    public Optional<User> findUsernameAndPassword(Long id) {
+        return userRepository.findById(id)
+                .map(User::getAccount)
+                .flatMap(account -> userRepository.findUsernameAndPassword(account.getUsername(), account.getPassword()));
     }
+
+    public Optional<User> updateUser(User user) {
+        Optional<User> userOptional = userRepository.findById(user.getId());
+        if (userOptional.isEmpty()) {
+            logger.error("User not found");
+            return Optional.empty();
+        } else {
+            // Обновляем только те поля, которые переданы и не являются null
+            if (user.getAccount() != null) {
+                userOptional.get().setAccount(user.getAccount());
+            }
+            if (user.getName() != null) {
+                userOptional.get().setName(user.getName());
+            }
+            if (user.getPhone() != null) {
+                userOptional.get().setPhone(user.getPhone());
+            }
+            userRepository.save(userOptional.get());
+        }
+        return userOptional;
+    }
+
+
 }

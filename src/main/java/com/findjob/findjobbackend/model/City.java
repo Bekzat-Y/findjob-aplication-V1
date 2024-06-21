@@ -1,6 +1,8 @@
 package com.findjob.findjobbackend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.findjob.findjobbackend.enums.Status;
+import com.findjob.findjobbackend.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -22,5 +24,7 @@ public class City {
     @OneToMany(targetEntity = RecruitmentNew.class, mappedBy = "city")
     @JsonIgnore
     private List<RecruitmentNew> recruitmentNews;
-
+    @Enumerated(EnumType.STRING)
+    @Column
+    private Status status;
 }

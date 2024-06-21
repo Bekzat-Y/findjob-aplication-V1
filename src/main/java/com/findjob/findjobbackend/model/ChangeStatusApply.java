@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class ChangeStatusApply {
-    private Long id;
-    private int status;
+    private Long ApplyId;
+    private Integer status;
 
 }

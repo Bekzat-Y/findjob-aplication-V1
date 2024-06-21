@@ -40,35 +40,6 @@ public  class Account {
             joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     Set<Role> roles = new HashSet<>();
 
-    public Account(Long id, String username, String password, Status status, Set<Role> roles) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.status = status;
-        this.roles = roles;
-    }
-
-    public Account(Long id, String username, String password, Status status, Boolean status2, Set<Role> roles) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.status = status;
-        this.status2 = status2;
-        this.roles = roles;
-    }
-
-    public Account(String username, String password, Status status, Set<Role> roles) {
-        this.username = username;
-        this.password = password;
-        this.status = status;
-        this.roles = roles;
-    }
-
-    public Account(String username, String password, Status status) {
-        this.username = username;
-        this.password = password;
-        this.status = status;
-    }
 
     public Account(String username, String password) {
         this.username = username;

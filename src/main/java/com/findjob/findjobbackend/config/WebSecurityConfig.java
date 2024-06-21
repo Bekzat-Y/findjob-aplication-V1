@@ -1,6 +1,7 @@
 package com.findjob.findjobbackend.config;
 
 import com.findjob.findjobbackend.security.jwt.JwtEntryPoint;
+import com.findjob.findjobbackend.security.jwt.JwtProvider;
 import com.findjob.findjobbackend.security.jwt.JwtTokenFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -24,9 +26,13 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 public class WebSecurityConfig{
     private final JwtEntryPoint jwtEntryPoint;
 
+    private final JwtProvider jwtProvider;
+    private final UserDetailsService userDetailsService;
+
+
     @Bean
     public JwtTokenFilter jwtTokenFilter() {
-        return new JwtTokenFilter();
+        return new JwtTokenFilter(jwtProvider, userDetailsService);
     }
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -43,11 +49,9 @@ public class WebSecurityConfig{
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/public/**").permitAll()
-                        .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/sign/signup").permitAll()
                         .requestMatchers("/sign/signin").permitAll()
-                        .requestMatchers("/user/add").permitAll()
+                        .requestMatchers("/sign/verify/").permitAll()
                         .anyRequest().permitAll()
                 )
                 .exceptionHandling(exceptionHandling ->

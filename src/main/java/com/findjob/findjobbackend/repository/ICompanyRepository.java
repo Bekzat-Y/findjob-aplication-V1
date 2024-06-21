@@ -16,7 +16,7 @@ public interface ICompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> findAllByAccount_Id(Long id);
     Boolean existsByName(String name);
 
-    @Query(value = "select c.* from company c where c.status_company = :stt limit 3;",nativeQuery = true)
+    @Query(value = "select c.* from company c where c.statuscompany = :stt limit 3;",nativeQuery = true)
     List<Company> findCompanyByStatus(@Param("stt") Integer stt);
 
     @Query(value = "select c.id as id,c.avatar as avatar,c.name as name" +

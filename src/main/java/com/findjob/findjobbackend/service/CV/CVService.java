@@ -1,10 +1,10 @@
 package com.findjob.findjobbackend.service.CV;
 
+import com.findjob.findjobbackend.enums.Status;
 import com.findjob.findjobbackend.model.CV;
 import com.findjob.findjobbackend.repository.ICVRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,6 @@ import java.util.Optional;
 public class CVService implements ICVService {
     private static final Logger logger = LoggerFactory.getLogger(CVService.class);
 
-    @Autowired
     private final ICVRepository icvRepository;
 
     public CVService(ICVRepository icvRepository) {
@@ -46,7 +45,10 @@ public class CVService implements ICVService {
             logger.error("CV with ID {} does not exist", id);
             throw new IllegalArgumentException("CV with ID " + id + " does not exist");
         }
-        icvRepository.deleteById(id);
+        icvRepository.findById(id).ifPresent(cv -> {
+            cv.setStatus(Status.DELETE);
+            icvRepository.save(cv);
+        });
     }
 
     @Override
@@ -82,6 +84,8 @@ public class CVService implements ICVService {
             logger.error("ID parameter is null");
             throw new IllegalArgumentException("ID parameter cannot be null");
         }
-        return icvRepository.findByUserId(id);
-    }
+        else
+      return icvRepository.findByUserId(id);
+        }
+
 }

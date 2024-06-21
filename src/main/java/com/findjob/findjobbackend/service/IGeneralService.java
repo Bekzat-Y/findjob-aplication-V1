@@ -1,5 +1,6 @@
 package com.findjob.findjobbackend.service;
 
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,7 +11,7 @@ public interface IGeneralService<T> {
 
     Page<T> findAll(Pageable pageable);
 
-    void deleteById(Long id);
+    void deleteById(Long id) throws ChangeSetPersister.NotFoundException;
 
     T save(T t);
 

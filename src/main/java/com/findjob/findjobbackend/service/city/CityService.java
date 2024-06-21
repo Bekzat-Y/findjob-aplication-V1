@@ -1,5 +1,6 @@
 package com.findjob.findjobbackend.service.city;
 
+import com.findjob.findjobbackend.enums.Status;
 import com.findjob.findjobbackend.model.City;
 import com.findjob.findjobbackend.repository.ICityRepository;
 import lombok.AllArgsConstructor;
@@ -31,25 +32,28 @@ public class CityService implements ICityService {
         return cityRepository.findAll(pageable);
     }
 
-    @Override
-    public void deleteById(Long id) {
+    public void getCityById(Long id) {
         if (id == null) {
-            logger.error("ID parameter is null ");
+            logger.error("ID parameter is null or empty");
             throw new IllegalArgumentException("ID parameter cannot be null");
         }
         if (!cityRepository.existsById(id)) {
             logger.error("City with ID {} does not exist", id);
             throw new IllegalArgumentException("City with ID " + id + " does not exist");
         }
-        cityRepository.deleteById(id);
+        City city = cityRepository.findById(id).orElse(null);
+        if (city != null) {
+            city.setStatus(Status.DELETE);
+            cityRepository.save(city);
+        }
     }
-
     @Override
     public City save(City city) {
         if (city == null) {
             logger.error("City parameter is null");
             throw new IllegalArgumentException("City parameter cannot be null");
         }
+        cityRepository.findById(city.getId()).ifPresent(city1 -> city.setStatus(Status.WAIT));
         return cityRepository.save(city);
     }
 
@@ -60,5 +64,20 @@ public class CityService implements ICityService {
             throw new IllegalArgumentException("ID parameter cannot be null");
         }
         return cityRepository.findById(id);
+    }
+
+    @Override
+    public City updateCity(City city) {
+        City updatedCity = cityRepository.findById(city.getId()).orElseThrow(IllegalArgumentException::new);
+        if (updatedCity == null) {
+            logger.error("City with ID {} does not exist ", city.getId());
+            throw new IllegalArgumentException("City with ID " + city.getId() + " does not exist");
+        }
+        else {
+            updatedCity.setId(city.getId());
+            updatedCity.setName(city.getName());
+            cityRepository.save(updatedCity);
+        }
+        return updatedCity;
     }
 }

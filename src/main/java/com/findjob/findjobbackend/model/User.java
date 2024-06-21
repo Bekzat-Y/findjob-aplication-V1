@@ -1,6 +1,7 @@
 package com.findjob.findjobbackend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.findjob.findjobbackend.enums.Status;
 import com.findjob.findjobbackend.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,5 +26,6 @@ public class User {
     @OneToMany(targetEntity = Apply.class, mappedBy = "user")
     @JsonIgnore
     private List<Apply> applies;
-    private UserStatus status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 }

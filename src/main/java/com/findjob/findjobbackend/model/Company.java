@@ -22,7 +22,6 @@ public class Company {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String codeCompany;
     private String name;
     private String avatar;
     private String description;
@@ -32,6 +31,7 @@ public class Company {
     private City city;
     private String linkMap;
     private String phone;
+    @Enumerated(EnumType.STRING)
     private Status statusCompany;
     @OneToOne
     private Account account;

@@ -1,6 +1,7 @@
 package com.findjob.findjobbackend.model;
 
 import com.findjob.findjobbackend.dto.request.SkillDTO;
+import com.findjob.findjobbackend.enums.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,6 +17,8 @@ public class Skill {
     private String proficiency;
     @ManyToOne(targetEntity = CV.class)
     private CV cv;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     public SkillDTO toDto(Skill skill) {
         SkillDTO skillDTO = new SkillDTO();

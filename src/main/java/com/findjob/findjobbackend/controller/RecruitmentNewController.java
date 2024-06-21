@@ -39,13 +39,6 @@ public class RecruitmentNewController {
         if (recruitmentNew.getQuantity() == null) {
             return new ResponseEntity<>(new ResponseMessage("no_quantity"), HttpStatus.OK);
         }
-        String nameex = recruitmentNew.getTitle().substring(0, 3);
-        int min = 100;
-        int max = 999;
-        String nameCompany = String.valueOf((int) Math.floor(Math.round((Math.random() * (max - min + 1) + min))));
-        ;
-        recruitmentNew.setCodeNews(nameex + nameCompany);
-        System.out.println(recruitmentNew.getCodeNews());
         recruitmentNew.setStatus(true);
 
         recruitmentNewService.save(recruitmentNew);
@@ -61,10 +54,10 @@ public class RecruitmentNewController {
         return new ResponseEntity<>(recuitmentNew, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
+    @GetMapping("/delete/{id}")
     public ResponseEntity<?> deleteRecruitmentNew(@PathVariable Long id) {
-        Optional<RecruitmentNew> recuitmentNew = recruitmentNewService.findById(id);
-        if (recuitmentNew.isEmpty()) {
+        Optional<RecruitmentNew> recruitmentNew = recruitmentNewService.findById(id);
+        if (recruitmentNew.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         recruitmentNewService.deleteById(id);
@@ -73,37 +66,14 @@ public class RecruitmentNewController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateRecruitmentNew(@PathVariable Long id, @RequestBody RecruitmentNew recruitmentNew) {
-        Optional<RecruitmentNew> recruitmentNewOptional = recruitmentNewService.findById(id);
-        if (recruitmentNewOptional.isEmpty()) {
+        ResponseMessage responseMessage = recruitmentNewService.updateRecruitmentNew(id, recruitmentNew);
+
+        if ("not_found".equals(responseMessage.getMessage())) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        RecruitmentNew existingRecruitmentNew = recruitmentNewOptional.get();
-
-        if (recruitmentNew.getQuantity() == null) {
-            return new ResponseEntity<>(new ResponseMessage("no_quantity"), HttpStatus.OK);
-        }
-
-        if (recruitmentNew.getSalary() == null) {
-            return new ResponseEntity<>(new ResponseMessage("no_salary"), HttpStatus.OK);
-        }
-
-        existingRecruitmentNew.setTitle(recruitmentNew.getTitle());
-        existingRecruitmentNew.setWorkingTime(recruitmentNew.getWorkingTime());
-        existingRecruitmentNew.setField(recruitmentNew.getField());
-        existingRecruitmentNew.setVacancies(recruitmentNew.getVacancies());
-        existingRecruitmentNew.setExpDate(recruitmentNew.getExpDate());
-        existingRecruitmentNew.setDescription(recruitmentNew.getDescription());
-        existingRecruitmentNew.setQuantity(recruitmentNew.getQuantity());
-        existingRecruitmentNew.setSalary(recruitmentNew.getSalary());
-        existingRecruitmentNew.setGender(recruitmentNew.getGender());
-        existingRecruitmentNew.setCity(recruitmentNew.getCity());
-
-        recruitmentNewService.save(existingRecruitmentNew);
-
-        return new ResponseEntity<>(new ResponseMessage("yes"), HttpStatus.OK);
+        return new ResponseEntity<>(responseMessage, HttpStatus.OK);
     }
-
 
     @GetMapping("/showAll/{id}")
     public ResponseEntity<?> findAllByCompany(@PathVariable Long id) {

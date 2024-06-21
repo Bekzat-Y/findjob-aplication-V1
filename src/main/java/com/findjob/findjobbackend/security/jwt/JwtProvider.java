@@ -4,6 +4,7 @@ import com.findjob.findjobbackend.security.userprincipal.UserPrinciple;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +13,8 @@ import java.util.Date;
 @Component
 public class JwtProvider {
     private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
-    private final String jwtSecret = "bekayrysbaev551@gmail.com";
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     public String createToken(Authentication authentication){
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
@@ -42,7 +44,7 @@ public class JwtProvider {
             return false;
         }
 
-        public String getUerNameFromToken(String token) {
+        public String getUserNameFromToken(String token) {
             return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
         }
 }

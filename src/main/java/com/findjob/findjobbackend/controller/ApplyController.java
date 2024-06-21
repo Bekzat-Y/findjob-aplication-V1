@@ -1,14 +1,12 @@
 package com.findjob.findjobbackend.controller;
 
-import com.findjob.findjobbackend.dto.request.ApplyJob;
-import com.findjob.findjobbackend.dto.response.ApplyShowAll;
+import com.findjob.findjobbackend.dto.request.ApplyJobDTO;
 import com.findjob.findjobbackend.dto.response.ResponseMessage;
+import com.findjob.findjobbackend.enums.Status;
 import com.findjob.findjobbackend.model.Apply;
 import com.findjob.findjobbackend.model.ChangeStatusApply;
 import com.findjob.findjobbackend.model.RecruitmentNew;
 import com.findjob.findjobbackend.model.User;
-import com.findjob.findjobbackend.enums.Status;
-import com.findjob.findjobbackend.service.CV.ICVService;
 import com.findjob.findjobbackend.service.apply.IApplyService;
 import com.findjob.findjobbackend.service.recruitmentNew.IRecruitmentNewService;
 import com.findjob.findjobbackend.service.user.IUserService;
@@ -32,18 +30,16 @@ public class ApplyController {
     private final IApplyService applyService;
     private final IRecruitmentNewService recruitmentNewService;
     private final IUserService userService;
-    private final ICVService icvService;
 
     @PostMapping
-    public ResponseEntity<?> createApply(@RequestBody ApplyJob applyJob) {
-        if (applyService.existsByUserIdAndRecruitmentNewId(applyJob.getUserId(), applyJob.getRecruitmentNewId())) {
-            return new ResponseEntity<>(new ResponseMessage("MATCH"), HttpStatus.OK);
-        }
-        if (icvService.existsByUserId(applyJob.getUserId())) {
+    public ResponseEntity<?> createApply(@RequestBody ApplyJobDTO applyJobDTO) {
+        if (Objects.isNull(applyJobDTO)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }else {
             LocalDate now = LocalDate.now();
-            RecruitmentNew recruitmentNew = recruitmentNewService.findById(applyJob.getRecruitmentNewId())
+            RecruitmentNew recruitmentNew = recruitmentNewService.findById(applyJobDTO.getRecruitmentNewId())
                     .orElseThrow(() -> new RuntimeException("RecruitmentNew not found"));
-            User user = userService.findByAccount_Id(applyJob.getUserId())
+            User user = userService.findByAccount_Id(applyJobDTO.getAccountId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
             Apply Apply = new Apply();
             Apply.setDate(now);
@@ -52,19 +48,18 @@ public class ApplyController {
             Apply.setRecruitmentNew(recruitmentNew);
             applyService.save(Apply);
             return new ResponseEntity<>(new ResponseMessage("CREATE"), HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(new ResponseMessage("CREATE_FAIL"), HttpStatus.OK);
         }
+
     }
 
-    @GetMapping("/findAllByCompanyID/{id}")
-    public ResponseEntity<?> findAllByCompany(@PageableDefault(direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long id) {
-        Page<ApplyShowAll> list = applyService.findAllByCompanyId(pageable, id);
-        if (list.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(list, HttpStatus.OK);
-    }
+//    @GetMapping("/findAllByCompanyID/{id}")
+//    public ResponseEntity<?> findAllByCompany(@PageableDefault(direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long id) {
+//        Page<ApplyShowAll> list = applyService.findAllByCompanyId(pageable, id);
+//        if (list.isEmpty()) {
+//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//        }
+//        return new ResponseEntity<>(list, HttpStatus.OK);
+//    }
 
     @GetMapping("/showAllApply/{id}")
     public ResponseEntity<?> showAllApplyById(@PageableDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable, @PathVariable Long id) {
@@ -77,7 +72,7 @@ public class ApplyController {
 
     @PostMapping("/changeStatusApply")
     public ResponseEntity<?> changeStatusApply(@RequestBody ChangeStatusApply changeStatusApply) {
-        Apply Apply = applyService.findById(changeStatusApply.getId())
+        Apply Apply = applyService.findById(changeStatusApply.getApplyId())
                 .orElseThrow(() -> new RuntimeException("Applys not found"));
 
         boolean check = false;
@@ -91,14 +86,13 @@ public class ApplyController {
                 }
             }
         }
-
         if (changeStatusApply.getStatus() == 1) {
             if (check) {
                 return new ResponseEntity<>(new ResponseMessage("Сотрудники были приняты на работу в другие компании"), HttpStatus.OK);
             }
             Apply.setStatus(Status.ACCEPT);
             applyService.save(Apply);
-            return new ResponseEntity<>(new ResponseMessage("Сотрудники были успешно адаптированы"), HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseMessage("Сотрудники были успешно приняты "), HttpStatus.OK);
         }
 
         if (changeStatusApply.getStatus() == 0) {
@@ -110,7 +104,7 @@ public class ApplyController {
         if (changeStatusApply.getStatus() == 2) {
             Apply.setStatus(Status.WAIT);
             applyService.save(Apply);
-            return new ResponseEntity<>(new ResponseMessage("Вы успешно изменили свой статус"), HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseMessage("Вы успешно изменили свой статус на ожидание"), HttpStatus.OK);
         }
 
         return new ResponseEntity<>(new ResponseMessage("Вы изменили состояние "), HttpStatus.OK);

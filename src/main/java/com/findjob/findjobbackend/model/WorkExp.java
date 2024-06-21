@@ -1,6 +1,8 @@
 package com.findjob.findjobbackend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.findjob.findjobbackend.dto.request.WorkExpDTO;
+import com.findjob.findjobbackend.enums.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,12 +15,16 @@ public class WorkExp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne(targetEntity = CV.class)
+    @ManyToOne
+    @JoinColumn(name = "cv_id", nullable = false )
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private CV cv;
     private String title;
     private LocalDate startDate;
     private LocalDate endDate;
     private String content;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     public WorkExpDTO toDto(WorkExp workExp) {
         WorkExpDTO workExpDTO = new WorkExpDTO();
@@ -27,7 +33,7 @@ public class WorkExp {
         workExpDTO.setStartDate(workExp.getStartDate());
         workExpDTO.setEndDate(workExp.getEndDate());
         workExpDTO.setTitle(workExp.getTitle());
-        workExpDTO.setCvId(workExp.getCv().getId());
+        workExpDTO.setCvId(workExpDTO.getCvId());
         return workExpDTO;
     }
 
